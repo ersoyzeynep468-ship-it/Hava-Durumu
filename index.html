@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pofuduk Hava</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2d4a;--panel:#fff8e8;--sub:#6b6e9c;--b-sunny:#5fc3ff;--b-cloudy:#9db4d9;--b-rainy:#6f86b8;--b-snowy:#bcd3f0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#f2f0ff;--panel:#2c2858;--sub:#c3c4ee}}
+:root[data-theme="dark"]{--ink:#f2f0ff;--panel:#2c2858;--sub:#c3c4ee}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;font-family:"Pixelify Sans",ui-monospace,monospace;color:var(--ink);background-color:var(--bg,var(--b-sunny))}
+body[data-w=sunny]{--bg:var(--b-sunny)}body[data-w=cloudy]{--bg:var(--b-cloudy)}body[data-w=rainy]{--bg:var(--b-rainy)}body[data-w=snowy]{--bg:var(--b-snowy)}
+#cv{-webkit-tap-highlight-color:transparent;user-select:none;position:fixed;inset:0;width:100%;height:100%;image-rendering:pixelated;z-index:0}
+.wrap{position:relative;z-index:1;max-width:460px;margin:0 auto;padding:14px 14px 70px 46px;pointer-events:none}.wrap>*{pointer-events:auto}.wrap.hide{visibility:hidden}
+.hdr{background:rgba(43,45,74,.6);border:3px solid rgba(255,255,255,.85);border-radius:10px;padding:8px 12px 10px;color:#fff;text-shadow:2px 2px 0 rgba(43,45,74,.8)}
+.r1,.r3,.r4{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:600}
+.r4{font-size:15px;margin-top:6px;opacity:.95}
+.hearts{color:#ff5d73;letter-spacing:2px}
+.ttl{font-size:30px;font-weight:700;line-height:1.05;margin:4px 0}
+.r3 b{font-size:44px;line-height:1}
+#q{display:block;width:100%;margin-top:14px;font:inherit;font-size:19px;padding:10px 14px;border:3px solid var(--ink);border-radius:10px;background:var(--panel);color:var(--ink);box-shadow:0 4px 0 var(--ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin-top:4px}
+.chips button{font:inherit;font-size:17px;border:3px solid var(--ink);border-radius:8px;padding:4px 12px;background:var(--panel);color:var(--ink);cursor:pointer;white-space:nowrap;box-shadow:0 3px 0 var(--ink)}
+.chips button[aria-pressed=true]{background:var(--ink);color:var(--panel);transform:translateY(3px);box-shadow:none}
+button:focus-visible,#q:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+.nf{color:#fff;font-size:16px;text-shadow:2px 2px 0 #2b2d4a}
+.panel{background:color-mix(in srgb,var(--panel) 85%,transparent);border:3px solid var(--ink);border-radius:10px;box-shadow:0 4px 0 var(--ink);padding:12px;margin-top:6px}
+h2{font-size:18px;margin:0 0 6px}
+.days{display:flex;gap:10px;overflow-x:auto}
+.day{flex:0 0 auto;min-width:84px;display:flex;flex-direction:column;align-items:center;font:inherit;font-size:16px;text-align:center;border:3px solid var(--ink);border-radius:8px;padding:6px;background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink)}.day[aria-pressed=true]{background:var(--ink);color:var(--panel);transform:translateY(3px);box-shadow:none}
+.day canvas{width:40px;height:40px}
+.note{text-align:center;color:#fff;font-size:14px;text-shadow:2px 2px 0 #2b2d4a}
+.bubble{position:fixed;z-index:2;pointer-events:none;background:#fff;color:#2b2d4a;border:3px solid #2b2d4a;border-radius:22px;padding:7px 14px;font-size:16px;font-weight:600;text-align:center;line-height:1.15;box-shadow:0 4px 0 #2b2d4a;animation:bb 2.4s ease-in-out infinite}
+.bubble::after{content:"";position:absolute;left:20px;bottom:-9px;width:13px;height:13px;background:#fff;border-right:3px solid #2b2d4a;border-bottom:3px solid #2b2d4a;transform:rotate(45deg);border-radius:0 0 6px 0}
+@keyframes bb{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.bubble{animation:none}}
+.hours{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.hr{flex:0 0 auto;min-width:58px;display:flex;flex-direction:column;align-items:center;font-size:15px}
+.hr canvas{width:32px;height:32px}
+.tg{position:fixed;z-index:3;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));font:inherit;font-size:16px;border:3px solid #2b2d4a;border-radius:8px;padding:6px 12px;background:#fff;color:#2b2d4a;box-shadow:0 3px 0 #2b2d4a;cursor:pointer}
+</style></head>
+<body data-w="sunny"><canvas id="cv" role="img" aria-label="Hava durumunu gösteren pixel art sahne"></canvas>
+<main class="wrap" id="wr">
+<div class="hdr"><div class="r1"><span id="clock"></span><span class="hearts" id="hearts"></span></div><div class="ttl" id="hd"></div><div class="r3"><span>hava durumu · <span id="wn"></span></span><b id="temp"></b></div><div class="r4" id="foot"></div></div>
+<input id="q" type="search" placeholder="Şehir ara, örn. Samsun" aria-label="Şehir ara" autocomplete="off">
+<div class="chips" id="res"></div>
+<div class="chips" id="cities" role="group" aria-label="Şehir"></div>
+<div class="chips" id="dists" role="group" aria-label="İlçe"></div>
+<section class="panel"><h2>5 günlük tahmin</h2><div class="days" id="days"></div><h2 id="hl" style="margin-top:12px"></h2><div class="hours" id="hours"></div></section>
+<p class="note">Örnek veriler gösteriliyor. Hayvana dokun: zıplar. Yağmurda buluta dokun: şimşek çakar.</p>
+</main>
+<button class="tg" id="tg">Paneli gizle</button>
+<div class="bubble" id="bubble"><span id="msg"></span></div>
+<script>
+const $=id=>document.getElementById(id);
+const g=$('cv').getContext('2d');
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h)};
+const CL=[[0,4,12,4],[2,1,5,4],[6,2,5,3]];
+function cloud(x,px,py,k,col,out){const f=(c,o)=>{x.fillStyle=c;CL.forEach(([a,b,w,h])=>x.fillRect(Math.round(px+a*k+o[0]),Math.round(py+b*k+o[1]),w*k,h*k))};
+ if(out)[[-1,0],[1,0],[0,-1],[0,1]].forEach(o=>f(out,o));f(col,[0,0])}
+const SP=['.....lll.....','....lllll....','......o......','...ooooooo...','..ogggggggo..','.ogggggggggo.','.oggegggeggo.','.ogpggoggpgo.','.ogggggggggo.','..ogggggggo..','...ooooooo...','...oo...oo...'];
+const PAL={o:'#2b3a4a',g:'#b6f0c4',l:'#4cc35a',e:'#1c1c2e',p:'#ff9db1'};
+const SK={sunny:['#5fc3ff','#8ad6ff','#b5e6ff'],cloudy:['#9db4d9','#b5c6e3','#cdd8ee'],rainy:['#6f86b8','#8398c4','#97a9d0'],snowy:['#bcd3f0','#d3e3f7','#e6f0fb']};
+const GR={sunny:['#86d97a','#5fbf5a','#4aa84c','#2f8f46','#3fae5a'],cloudy:['#7fcf78','#5cb858','#47a24a','#2f8f46','#3fae5a'],rainy:['#6fb87a','#4fa05c','#3f8a50','#2d7a45','#3f9a62'],snowy:['#f4fbff','#e3f1fb','#cfe3f3','#9fc3de','#d6ebf7']};
+const NAMES={sunny:'Güneşli',cloudy:'Bulutlu',rainy:'Yağmurlu',snowy:'Karlı'};
+const MSG={sunny:'Hava harika! Güneş kremini unutma.',cloudy:'İnce bir ceket iyi olur.',rainy:'Yağmur yağacak, şemsiyemizi alalım!',snowy:'Hava buz gibi! Atkını tak, üşüme.'};
+const HEART={sunny:3,cloudy:2,rainy:2,snowy:1};
+const D={
+'İstanbul':{t:19,f:[['cloudy',21,15],['rainy',18,13],['rainy',17,12],['sunny',22,14],['sunny',24,15]],ds:{'Kadıköy':[0,'cloudy'],'Beşiktaş':[-1,'cloudy'],'Üsküdar':[0,'rainy'],'Sarıyer':[-2,'rainy']},h:68,r:14,u:3},
+'Ankara':{t:23,f:[['sunny',26,12],['sunny',27,13],['cloudy',24,12],['rainy',20,10],['cloudy',21,9]],ds:{'Çankaya':[0,'sunny'],'Keçiören':[-1,'sunny'],'Yenimahalle':[1,'cloudy']},h:34,r:6,u:6},
+'İzmir':{t:27,f:[['sunny',30,20],['sunny',31,21],['sunny',29,20],['cloudy',27,19],['rainy',24,18]],ds:{'Konak':[0,'sunny'],'Karşıyaka':[-1,'sunny'],'Çeşme':[-2,'cloudy']},h:45,r:10,u:7},
+'Antalya':{t:21,f:[['rainy',22,16],['cloudy',24,17],['sunny',28,18],['sunny',29,19],['sunny',30,20]],ds:{'Muratpaşa':[0,'rainy'],'Kaş':[-1,'cloudy'],'Alanya':[1,'rainy']},h:80,r:11,u:2},
+'Erzurum':{t:-2,f:[['snowy',0,-8],['snowy',-1,-9],['cloudy',2,-6],['sunny',5,-4],['sunny',7,-3]],ds:{'Yakutiye':[0,'snowy'],'Palandöken':[-3,'snowy']},h:78,r:12,u:1}};
+const TR='Adana,Adıyaman,Afyonkarahisar,Ağrı,Aksaray,Amasya,Antalya,Ardahan,Artvin,Aydın,Balıkesir,Bartın,Batman,Bayburt,Bilecik,Bingöl,Bitlis,Bolu,Burdur,Bursa,Çanakkale,Çankırı,Çorum,Denizli,Diyarbakır,Düzce,Edirne,Elazığ,Erzincan,Eskişehir,Gaziantep,Giresun,Gümüşhane,Hakkari,Hatay,Iğdır,Isparta,Kahramanmaraş,Karabük,Karaman,Kars,Kastamonu,Kayseri,Kırıkkale,Kırklareli,Kırşehir,Kilis,Kocaeli,Konya,Kütahya,Malatya,Manisa,Mardin,Mersin,Muğla,Muş,Nevşehir,Niğde,Ordu,Osmaniye,Rize,Sakarya,Samsun,Siirt,Sinop,Sivas,Şanlıurfa,Şırnak,Tekirdağ,Tokat,Trabzon,Tunceli,Uşak,Van,Yalova,Yozgat,Zonguldak,Ankara,Erzurum,İstanbul,İzmir'.split(',');
+const XD={Samsun:['İlkadım','Atakum','Canik'],Bursa:['Nilüfer','Osmangazi'],Trabzon:['Ortahisar','Akçaabat'],Konya:['Selçuklu','Meram'],Adana:['Seyhan','Çukurova'],Gaziantep:['Şahinbey','Şehitkamil'],Mersin:['Yenişehir','Mezitli'],Kayseri:['Melikgazi','Kocasinan']};
+const norm=s=>s.toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i');
+function mk(name){const h=[...name].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7),K=['sunny','sunny','cloudy','cloudy','rainy','rainy','snowy'],w=K[h%7],t=w==='snowy'?-3:8+h%20;
+ const f=[0,1,2,3,4].map(i=>[K[(h+i*3)%7],t+2+i%3,t-5+i%2]);f[0][0]=w;
+ const ds={};(XD[name]||['Merkez']).forEach((d,j)=>ds[d]=[j%3-1,w]);
+ return{t,f,ds,h:30+h%60,r:4+h%20,u:1+h%8}}
+let city='İstanbul',dist='Kadıköy',W='cloudy',P=[];
+const NC={sunny:2,cloudy:4,rainy:4,snowy:3},CC={sunny:'#fff',cloudy:'#f2f5ff',rainy:'#aab4d6',snowy:'#fff'};
+const STARS=[[.07,.04],[.18,.09],[.33,.03],[.46,.08],[.58,.02],[.7,.1],[.93,.05],[.25,.15],[.86,.16],[.52,.14]];
+const TUFT=[[.07,.1],[.17,.5],[.84,.15],[.92,.45],[.27,.3],[.74,.6],[.12,.85],[.55,.9],[.4,.12],[.65,.25]];
+const FL=[[.2,.2,'#ff7aa8'],[.8,.3,'#ffe066'],[.35,.55,'#fff'],[.62,.2,'#ff9f43'],[.1,.65,'#ff7aa8'],[.9,.8,'#fff'],[.5,.7,'#ffe066']];
+const isNight=()=>{const h=new Date().getHours();return h<6||h>=20};
+function frame(t,dt){
+ const n=isNight(),s=n?['#1d2260','#2c3380','#3d46a0']:SK[W],c=GR[W],gy=GY,a=Math.round(gy*.5),b=Math.round(gy*.8),gh=LH-gy;
+ R(0,0,LW,a,s[0]);R(0,a,LW,b-a,s[1]);R(0,b,LW,gy-b+12,s[2]);
+ if(!n&&W==='sunny'){const x=LW-22,y=gy-22,Y='#ffd23f';R(x+1,y+1,9,9,Y);R(x,y+2,11,7,Y);R(x+2,y,7,11,Y);
+  if((t/500|0)%2)[[x+4,y-6,2,3],[x+4,y+14,2,3],[x-6,y+4,3,2],[x+13,y+4,3,2]].forEach(r=>R(...r,'#ffb21f'))}
+ CLS.length=0;for(let i=0;i<NC[W];i++){const x=((i*37+t*.008*(1+i*.3))%(LW+50))-25,y=i===0?LH-82:6+(i*13)%Math.max(10,gy-60);CLS.push([x,y]);cloud(g,x,y,2,n?'#8a93cf':CC[W])}
+ for(let x=0;x<LW;x++){const top=gy-2-Math.round(3+3*Math.sin(x/12+1));R(x,top,1,gy-top+6,c[0])}
+ [[.08,0],[.9,0],[.3,5]].forEach(([f,o])=>{const x=Math.round(LW*f),y=gy+o;R(x+2,y-8,2,8,'#8b5a3c');R(x-1,y-14,8,7,c[4]);R(x,y-16,6,2,c[4]);R(x+1,y-17,4,1,c[4])});
+ R(0,gy,LW,gh,c[1]);
+ const oy=gy+Math.round(gh*.55),ry=Math.max(6,Math.round(gh*.3)),rx=Math.round(LW*.42);
+ for(let y=-ry;y<=ry;y++){const h=Math.round(rx*Math.sqrt(1-y*y/(ry*ry)));R(Math.round(LW/2)-h,oy+y,2*h,1,c[2])}
+ TUFT.forEach(([fx,fy])=>{const x=Math.round(fx*LW),y=gy+Math.round(fy*(gh-5));R(x,y,1,3,c[3]);R(x+2,y+1,1,2,c[3]);R(x-2,y+1,1,2,c[3])});
+ if(W==='sunny'||W==='cloudy')FL.forEach(([fx,fy,f])=>{const x=Math.round(fx*LW),y=gy+Math.round(fy*(gh-8));R(x,y,2,2,f);R(x,y+2,1,3,'#2f8f46')});
+ const k=2,tt=(t-JT)/700,jy=tt>=0&&tt<1?Math.round(Math.sin(tt*Math.PI)*10):0,shock=t-LT<700,cx=6+(shock?((t/60|0)%2?2:-2):0),cy=LH-8-12*k-jy,blink=t%3000<150;
+ R(cx,LH-9,26,3,'rgba(0,0,0,.18)');
+ if(W==='rainy'){const f=Math.min(1,(t-UT)/500),ur=(x,y,w,h,c)=>{const m=Math.max(2,Math.round(w*f));R(x+Math.round((w-m)/2),y,m,h,c)};ur(cx-8,cy-20,42,4,'#ff5d73');ur(cx-4,cy-24,34,4,'#ff8fa3');ur(cx,cy-26,26,2,'#ff5d73');R(cx+12,cy-16,2,18,'#6b4a3a')}
+ SP.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch!=='.')R(cx+i*k,cy+j*k,k,k,ch==='e'&&blink?PAL.g:(ch==='g'&&shock?'#fff3a0':PAL[ch]))}));
+ if(W==='sunny'&&!n){R(cx+6,cy+12,6,4,'#111');R(cx+14,cy+12,6,4,'#111');R(cx+12,cy+12,2,2,'#111');R(cx+6,cy+12,2,2,'#fff')}
+ if(W==='snowy'){R(cx+4,cy+18,18,4,'#ff5d73');R(cx+18,cy+20,4,8,'#ff5d73')}
+ if(W==='rainy'||W==='snowy')P.forEach(p=>{p.y+=p.s*dt*(W==='rainy'?.06:.02);if(p.y>LH){p.y=-4;p.x=Math.random()*LW}
+  W==='rainy'?R(p.x,p.y,1,3,'#d6ecff'):R(p.x+Math.sin(t/600+p.ph)*2,p.y,2,2,'#fff')});
+ const lt=t-LT;if(lt<500){if(lt<200||(lt/70|0)%2===0)for(let i=1;i<BOLT.length;i++){ln(BOLT[i-1],BOLT[i],3,'#ffe94a');ln(BOLT[i-1],BOLT[i],1,'#fff')}R(0,0,LW,LH,`rgba(255,255,255,${Math.max(0,.55*(1-lt/350))})`)}
+ if(n){R(0,0,LW,LH,'rgba(20,20,80,.3)');R(LW-22,gy-22,6,6,'#fff6c8');R(LW-19,gy-23,4,5,'#1d2260');
+  STARS.forEach(([x,y],i)=>(t/400+i|0)%3?R(x*LW,y*gy,1,1,'#fff'):0)}
+}
+function icon(c,type){const x=c.getContext('2d'),r=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a,b,w,h)},k='#2b2d4a';
+ if(type==='moon'){const y='#ffe9a0';r(4,4,8,8,y);r(5,3,6,10,y);r(3,5,10,6,y);x.clearRect(8,3,6,8);r(12,2,1,1,y);r(14,5,1,1,y);return}
+ if(type==='sunny'){[[7,0],[7,14],[0,7],[14,7],[2,2],[12,2],[2,12],[12,12]].forEach(([a,b])=>r(a,b,2,2,'#ff9f1c'));
+  r(4,4,8,8,'#ffc933');r(5,3,6,10,'#ffc933');r(3,5,10,6,'#ffc933');r(6,7,1,2,k);r(9,7,1,2,k);r(7,10,2,1,k);return}
+ const cy=type==='cloudy'?4:1;cloud(x,2,cy,1,'#eef1ff','#5a64a8');r(6,cy+5,1,1,k);r(9,cy+5,1,1,k);
+ if(type==='rainy')[5,8,11].forEach((a,i)=>r(a,11+i%2,1,3,'#3fa0ff'));
+ if(type==='snowy')[5,8,11].forEach((a,i)=>r(a,11+i%2,2,2,'#8fd0ff'))}
+let last=0;const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function loop(t){const dt=Math.min(50,t-last);last=t;frame(t,dt);requestAnimationFrame(loop)}
+let LW=120,LH=200,S=4,GY=120,JT=-1e9,UT=-1e9,LT=-1e9,BOLT=[],CLS=[],MSGNOW='',selDay=0;const DN=[];
+function ln(a,b,w,col){const n=Math.max(1,Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]));for(let i=0;i<=n;i++)R(a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n,w,w,col)}
+function say(m,ms){$('msg').textContent=m;clearTimeout(say.t);say.t=setTimeout(()=>$('msg').textContent=MSGNOW,ms)}
+function tap(e){const r=$('cv').getBoundingClientRect(),lx=(e.clientX-r.left)/r.width*LW,ly=(e.clientY-r.top)/r.height*LH;
+ if(W==='rainy'){const c=CLS.find(([x,y])=>lx>=x-2&&lx<=x+26&&ly>=y-2&&ly<=y+18);
+  if(c){const sx=c[0]+12,sy=c[1]+14,tx=19,ty=LH-30;BOLT=[[sx,sy]];for(let i=1;i<7;i++)BOLT.push([sx+(tx-sx)*i/7+(Math.random()-.5)*10,sy+(ty-sy)*i/7]);BOLT.push([tx,ty]);LT=performance.now();say('Aaa! Şimşek çaktı!',1800);return}}
+ if(lx>=0&&lx<=34&&ly>=LH-62&&ly<=LH-6){JT=performance.now();say(['Hop!','Hoppa!','Yaşasın!'][Math.random()*3|0],1200)}}
+$('cv').addEventListener('pointerdown',tap);
+$('tg').onclick=()=>{const h=$('wr').classList.toggle('hide');$('tg').textContent=h?'Paneli göster':'Paneli gizle'};
+function setP(){P=[...Array(W==='rainy'?Math.round(LW*.5):W==='snowy'?Math.round(LW*.35):0)].map(()=>({x:Math.random()*LW,y:Math.random()*LH,s:.6+Math.random()*.6,ph:Math.random()*6}))}
+function posBubble(){const b=$('bubble');b.style.left='10px';b.style.bottom=(W==='rainy'?62:36)*S+'px';b.style.maxWidth=Math.min(innerWidth*.4,190)+'px'}
+function resize(){S=Math.min(6,Math.max(4,Math.round(innerWidth/110)));LW=Math.ceil(innerWidth/S);LH=Math.ceil(innerHeight/S);GY=LH-40;
+ const c=$('cv');c.width=LW;c.height=LH;setP();posBubble();if(reduce)frame(0,0)}
+addEventListener('resize',resize);
+function renderHours(){const c=D[city],dt=c.ds[dist][0],d=c.f[selDay],hi=d[1]+dt,lo=d[2]+dt,st=selDay===0?new Date().getHours():0,o=[];
+ for(let h=st;h<24;h++){let w=d[0];if(w==='rainy'&&(h<4||h>=19))w='cloudy';if(w==='cloudy'&&(h===12||h===15))w='sunny';if(w==='sunny'&&(h<6||h>=21))w='moon';
+  o.push(`<div class="hr"><span>${String(h).padStart(2,'0')}:00</span><canvas width="16" height="16" data-w="${w}"></canvas><b>${Math.round(lo+(hi-lo)*(Math.sin(2*Math.PI*(h-9)/24)*.5+.5))}°</b></div>`)}
+ $('hours').innerHTML=o.join('');$('hl').textContent='Saatlik · '+DN[selDay];
+ document.querySelectorAll('#hours canvas').forEach(cv=>icon(cv,cv.dataset.w))}
+$('days').onclick=e=>{const b=e.target.closest('button');if(b){selDay=+b.dataset.i;document.querySelectorAll('#days button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderHours()}};
+function render(){selDay=0;const c=D[city],[dt,w]=c.ds[dist];W=w;if(w==='rainy')UT=performance.now();setP();posBubble();document.body.dataset.w=w;
+ $('cities').innerHTML=Object.keys(D).map(n=>`<button aria-pressed="${n===city}" data-c="${n}">${n}</button>`).join('');
+ $('dists').innerHTML=Object.keys(c.ds).map(n=>`<button aria-pressed="${n===dist}" data-d="${n}">${n}</button>`).join('');
+ $('hd').textContent=`${dist}, ${city}`;$('temp').textContent=(c.t+dt)+'°';$('wn').textContent=NAMES[w];MSGNOW=(w==='sunny'&&c.t+dt>=28)?'Çok sıcak! Bol su içelim.':MSG[w];$('msg').textContent=MSGNOW;
+ $('hearts').textContent='♥'.repeat(HEART[w])+'♡'.repeat(3-HEART[w]);
+ $('foot').innerHTML=`<span>NEM %${c.h}</span><span>RÜZGAR ${c.r}</span><span>UV ${c.u}</span>`;
+ const now=new Date();
+ $('days').innerHTML=c.f.map((d,i)=>{const dd=new Date(now.getTime()+i*864e5);
+  const nm=DN[i]=i===0?'Bugün':i===1?'Yarın':dd.toLocaleDateString('tr-TR',{weekday:'long'});
+  return `<button class="day" data-i="${i}" aria-pressed="${i===0}"><span>${nm}</span><canvas width="16" height="16" data-i="${i}"></canvas><span>${d[1]+dt}° / ${d[2]+dt}°</span></button>`}).join('');
+ document.querySelectorAll('#days canvas').forEach(cv=>icon(cv,c.f[cv.dataset.i][0]));renderHours();
+ if(reduce)frame(0,0)}
+$('cities').onclick=e=>{const b=e.target.closest('button');if(b){city=b.dataset.c;dist=Object.keys(D[city].ds)[0];render()}};
+$('dists').onclick=e=>{const b=e.target.closest('button');if(b){dist=b.dataset.d;render()}};
+function matches(){const v=norm($('q').value.trim());return v?TR.filter(n=>norm(n).includes(v)).slice(0,6):[]}
+function pick(n){if(!D[n])D[n]=mk(n);city=n;dist=Object.keys(D[n].ds)[0];$('q').value='';$('res').innerHTML='';render()}
+$('q').oninput=()=>{const m=matches();$('res').innerHTML=m.length?m.map(n=>`<button data-s="${n}">${n}</button>`).join(''):$('q').value.trim()?'<span class="nf">Bulunamadı. Şimdilik Türkiye illeri aranabiliyor.</span>':''};
+$('q').onkeydown=e=>{if(e.key==='Enter'){const m=matches();if(m[0])pick(m[0])}};
+$('res').onclick=e=>{const b=e.target.closest('button');if(b)pick(b.dataset.s)};
+const tick=()=>{$('clock').textContent=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})};
+tick();setInterval(tick,10000);resize();render();if(!reduce)requestAnimationFrame(loop);
+</script></body></html>
